@@ -1,6 +1,6 @@
-﻿using DbExportModule.Core.Models;
+﻿using ETLModule.Core.Models;
 
-namespace DbExportModule.Core.Repositories;
+namespace ETLModule.Core.Repositories;
 
 /// <summary>
 /// Определяет контракт для динамического взаимодействия с хранилищем данных.

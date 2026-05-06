@@ -1,6 +1,6 @@
 ﻿using System.Data.Common;
 
-namespace DbExportModule.Core.Database.Factories;
+namespace ETLModule.Core.Database.Factories;
 
 /// <summary>
 /// Абстрактная фабрика для создания подключений к базе данных.

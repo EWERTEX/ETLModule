@@ -1,4 +1,4 @@
-﻿namespace DbExportModule.Core.Files.Interfaces;
+﻿namespace ETLModule.Core.Files.Interfaces;
 
 /// <summary>
 /// Определяет контракт для импорта (чтения) данных из различных файловых форматов.

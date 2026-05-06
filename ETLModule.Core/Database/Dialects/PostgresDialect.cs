@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using DbExportModule.Core.Models;
+using ETLModule.Core.Models;
 
-namespace DbExportModule.Core.Database.Dialects;
+namespace ETLModule.Core.Database.Dialects;
 
 /// <summary>
 /// Реализация SQL-диалекта для PostgreSQL.

@@ -4,6 +4,6 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 appsettings.json
-DbExportModule.sln.DotSettings.user
+ETLModule.sln.DotSettings.user
 # JetBrains Rider
 .idea/

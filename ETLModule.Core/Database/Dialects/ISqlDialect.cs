@@ -1,4 +1,4 @@
-﻿namespace DbExportModule.Core.Database.Dialects;
+﻿namespace ETLModule.Core.Database.Dialects;
 
 /// <summary>
 /// Интерфейс диалекта SQL. 

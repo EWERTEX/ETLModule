@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using Npgsql;
 
-namespace DbExportModule.Core.Database.Factories;
+namespace ETLModule.Core.Database.Factories;
 
 /// <summary>
 /// Реализация фабрики подключений для СУБД PostgreSQL.

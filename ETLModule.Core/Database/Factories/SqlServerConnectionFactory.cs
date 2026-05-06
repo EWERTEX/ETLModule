@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using Microsoft.Data.SqlClient;
 
-namespace DbExportModule.Core.Database.Factories;
+namespace ETLModule.Core.Database.Factories;
 
 /// <summary>
 /// Реализация фабрики подключений для Microsoft SQL Server.

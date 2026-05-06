@@ -1,4 +1,4 @@
-﻿namespace DbExportModule.Core.Analysis;
+﻿namespace ETLModule.Core.Analysis;
 
 /// <summary>
 /// Предоставляет контракт для анализатора типов данных.

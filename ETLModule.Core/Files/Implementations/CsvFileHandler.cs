@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using DbExportModule.Core.Files.Interfaces;
+using ETLModule.Core.Files.Interfaces;
 
-namespace DbExportModule.Core.Files.Implementations;
+namespace ETLModule.Core.Files.Implementations;
 
 /// <summary>
 /// Обеспечивает функциональность для чтения и записи данных в формате CSV (Comma-Separated Values).

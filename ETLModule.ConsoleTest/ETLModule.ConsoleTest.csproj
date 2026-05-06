@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DbExportModule.Core\DbExportModule.Core.csproj" />
+      <ProjectReference Include="..\ETLModule.Core\ETLModule.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

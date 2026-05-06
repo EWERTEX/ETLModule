@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace DbExportModule.Core.Analysis;
+namespace ETLModule.Core.Analysis;
 
 /// <summary>
 /// Реализует механизм логического вывода типов (Type Inference) для динамических наборов данных.

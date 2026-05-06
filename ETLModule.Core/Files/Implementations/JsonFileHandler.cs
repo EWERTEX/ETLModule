@@ -1,8 +1,8 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
-using DbExportModule.Core.Files.Interfaces;
+using ETLModule.Core.Files.Interfaces;
 
-namespace DbExportModule.Core.Files.Implementations;
+namespace ETLModule.Core.Files.Implementations;
 
 /// <summary>
 /// Обеспечивает функциональность для импорта и экспорта табличных данных в формате JSON.

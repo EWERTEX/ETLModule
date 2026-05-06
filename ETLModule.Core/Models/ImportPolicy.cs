@@ -1,4 +1,4 @@
-﻿namespace DbExportModule.Core.Models;
+﻿namespace ETLModule.Core.Models;
 
 /// <summary>
 /// Определяет стратегию разрешения конфликтов при обнаружении дублирующихся записей 

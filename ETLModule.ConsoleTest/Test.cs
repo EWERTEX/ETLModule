@@ -1,14 +1,14 @@
 ﻿using System.Globalization;
 using Microsoft.Extensions.Configuration;
-using DbExportModule.Core.Analysis;
-using DbExportModule.Core.Database.Dialects;
-using DbExportModule.Core.Database.Factories;
-using DbExportModule.Core.Files.Implementations;
-using DbExportModule.Core.Files.Interfaces;
-using DbExportModule.Core.Models;
-using DbExportModule.Core.Repositories;
+using ETLModule.Core.Analysis;
+using ETLModule.Core.Database.Dialects;
+using ETLModule.Core.Database.Factories;
+using ETLModule.Core.Files.Implementations;
+using ETLModule.Core.Files.Interfaces;
+using ETLModule.Core.Models;
+using ETLModule.Core.Repositories;
 
-namespace DbExportModule.ConsoleTest;
+namespace ETLModule.ConsoleTest;
 
 /// <summary>
 /// Обеспечивает комплексное интеграционное тестирование всех слоев модуля (ETL-конвейера).

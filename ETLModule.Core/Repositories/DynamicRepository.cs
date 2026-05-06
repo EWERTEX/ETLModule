@@ -1,8 +1,8 @@
-﻿using DbExportModule.Core.Models;
-using DbExportModule.Core.Database.Dialects;
-using DbExportModule.Core.Database.Factories;
+﻿using ETLModule.Core.Database.Dialects;
+using ETLModule.Core.Database.Factories;
+using ETLModule.Core.Models;
 
-namespace DbExportModule.Core.Repositories;
+namespace ETLModule.Core.Repositories;
 
 /// <summary>
 /// Реализует механизм динамического доступа к данным посредством базовых абстракций ADO.NET.
