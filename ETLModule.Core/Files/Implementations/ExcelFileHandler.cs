@@ -1,11 +1,11 @@
-﻿using OfficeOpenXml;
+﻿using ClosedXML.Excel;
 using ETLModule.Core.Files.Interfaces;
 
 namespace ETLModule.Core.Files.Implementations;
 
 /// <summary>
 /// Обеспечивает функциональность для импорта и экспорта табличных данных в формате Excel (XLSX).
-/// Использует библиотеку EPPlus (версии 4.5.3.3) для генерации нативных файлов Office Open XML.
+/// Использует библиотеку ClosedXML для безопасной генерации файлов Office Open XML.
 /// </summary>
 public class ExcelFileHandler : IFileImporter, IFileExporter
 {
@@ -18,35 +18,37 @@ public class ExcelFileHandler : IFileImporter, IFileExporter
         }
 
         // Парсинг Excel-архива является процессорозависимой (CPU-bound) операцией.
-        // Использование Task.Run предотвращает блокировку вызывающего потока.
         return await Task.Run(() =>
         {
             var result = new List<Dictionary<string, string>>();
-            var fileInfo = new FileInfo(filePath);
 
-            using var package = new ExcelPackage(fileInfo);
-            
-            // Выбирается первый лист в книге
-            var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-            
-            if (worksheet == null || worksheet.Dimension == null)
+            using var workbook = new XLWorkbook(filePath);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+
+            if (worksheet == null)
             {
-                return result; // Возвращается пустая коллекция, если лист или данные отсутствуют
+                return result;
             }
 
-            var rowCount = worksheet.Dimension.Rows;
-            var colCount = worksheet.Dimension.Columns;
+            // Определение границ реально заполненных данных
+            var lastRowUsed = worksheet.LastRowUsed();
+            var lastColumnUsed = worksheet.LastColumnUsed();
 
-            // Считывание заголовков из первой строки (индексация в EPPlus начинается с 1)
+            if (lastRowUsed == null || lastColumnUsed == null)
+            {
+                return result;
+            }
+
+            var rowCount = lastRowUsed.RowNumber();
+            var colCount = lastColumnUsed.ColumnNumber();
+
             var headers = new List<string>();
             for (var col = 1; col <= colCount; col++)
             {
-                // Использование свойства Text гарантирует получение отформатированного строкового представления,
-                // избавляя от необходимости вручную приводить типы дат и чисел.
-                headers.Add(worksheet.Cells[1, col].Text);
+                // Метод GetString() гарантирует извлечение строкового представления ячейки
+                headers.Add(worksheet.Cell(1, col).GetString());
             }
 
-            // Считывание строк с данными (начиная со второй строки)
             for (var row = 2; row <= rowCount; row++)
             {
                 var dataRow = new Dictionary<string, string>();
@@ -55,19 +57,17 @@ public class ExcelFileHandler : IFileImporter, IFileExporter
                 for (var col = 1; col <= colCount; col++)
                 {
                     var header = headers[col - 1];
-                    var value = worksheet.Cells[row, col].Text;
+                    var value = worksheet.Cell(row, col).GetString();
 
                     if (!string.IsNullOrWhiteSpace(value))
                     {
                         hasData = true;
                     }
 
-                    // Защита от пустых заголовков в Excel-файле
                     var safeHeader = string.IsNullOrWhiteSpace(header) ? $"Column_{col}" : header;
                     dataRow[safeHeader] = value;
                 }
 
-                // Пропуск полностью пустых строк, которые могли образоваться при удалении данных пользователем
                 if (hasData)
                 {
                     result.Add(dataRow);
@@ -85,57 +85,78 @@ public class ExcelFileHandler : IFileImporter, IFileExporter
 
         await Task.Run(() =>
         {
-            var fileInfo = new FileInfo(filePath);
-            
-            // Удаление существующего файла для перезаписи
-            if (fileInfo.Exists)
-            {
-                fileInfo.Delete();
-            }
-
-            using var package = new ExcelPackage(fileInfo);
-            var worksheet = package.Workbook.Worksheets.Add("Exported Data");
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Exported Data");
 
             if (dataList.Count == 0)
             {
-                package.Save();
+                workbook.SaveAs(filePath);
                 return;
             }
 
             var headers = dataList.First().Keys.ToList();
 
-            // Запись заголовков и их стилизация
+            // Запись и стилизация заголовков
             for (var col = 1; col <= headers.Count; col++)
             {
-                var cell = worksheet.Cells[1, col];
+                var cell = worksheet.Cell(1, col);
                 cell.Value = headers[col - 1];
-                cell.Style.Font.Bold = true; // Выделение заголовков жирным шрифтом
+                cell.Style.Font.Bold = true;
             }
 
-            // Запись типизированных данных
+            // Запись данных
             for (var row = 0; row < dataList.Count; row++)
             {
                 var currentRow = dataList[row];
                 for (var col = 1; col <= headers.Count; col++)
                 {
                     var header = headers[col - 1];
-                    var cell = worksheet.Cells[row + 2, col]; // +2: строка 1 занята заголовками, а индекс 'row' начинается с 0
+                    var cell = worksheet.Cell(row + 2, col);
 
-                    if (!currentRow.TryGetValue(header, out object? value) || value == null) continue;
-                    cell.Value = currentRow[header];
-                        
-                    // Применение нативного Excel-форматирования, если тип значения — дата
-                    if (currentRow[header] is DateTime)
+                    if (currentRow.TryGetValue(header, out var value) && value != null)
                     {
-                        cell.Style.Numberformat.Format = "yyyy-mm-dd hh:mm:ss";
+
+                        // ClosedXML строго типизирован, необходимо явное приведение типов для корректной записи
+                        switch (value)
+                        {
+                            case DateTime dt:
+                                cell.Value = dt;
+                                cell.Style.DateFormat.Format = "yyyy-mm-dd hh:mm:ss";
+                                break;
+                            case double d:
+                                cell.Value = d;
+                                break;
+                            case long l:
+                                cell.Value = l;
+                                break;
+                            case bool b:
+                                cell.Value = b;
+                                break;
+                            default:
+                                cell.Value = value.ToString();
+                                break;
+                        }
                     }
                 }
             }
 
-            // Автоматическая настройка ширины всех колонок под содержимое для аккуратного внешнего вида
-            worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+            // Автоматическая настройка ширины колонок под размер содержимого.
+            // Изолировано в try-catch, так как графический движок может упасть 
+            // при сканировании системных шрифтов Windows (например, из-за закрытых папок вроде Mysql).
+            try
+            {
+                worksheet.Columns().AdjustToContents();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Игнорирование ошибки доступа. Файл сохранится со стандартной шириной колонок.
+            }
+            catch (Exception)
+            {
+                // Перехват любых других сбоев отрисовщика шрифтов SixLabors.
+            }
 
-            package.Save();
+            workbook.SaveAs(filePath);
         });
     }
 }
