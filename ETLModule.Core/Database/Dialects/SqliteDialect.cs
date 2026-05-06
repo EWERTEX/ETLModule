@@ -8,12 +8,14 @@ namespace ETLModule.Core.Database.Dialects;
 /// </summary>
 public class SqliteDialect : ISqlDialect
 {
+    /// <inheritdoc />
     public string EscapeIdentifier(string identifier)
     {
         // В SQLite безопаснее всего оборачивать идентификаторы в двойные кавычки
         return $"\"{identifier}\"";
     }
 
+    /// <inheritdoc />
     public string GetSqlDataType(Type type)
     {
         // Базовый маппинг типов (можно расширять при необходимости)
@@ -25,12 +27,14 @@ public class SqliteDialect : ISqlDialect
         return "TEXT";
     }
 
+    /// <inheritdoc />
     public string GetTableListQuery()
     {
         // Системная таблица SQLite. Исключает системные таблицы самого движка (начинаются с sqlite_)
         return "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';";
     }
 
+    /// <inheritdoc />
     public string BuildCreateTableQuery(string tableName, Dictionary<string, Type> columns)
     {
         var sb = new StringBuilder();
@@ -51,6 +55,7 @@ public class SqliteDialect : ISqlDialect
         return sb.ToString();
     }
 
+    /// <inheritdoc />
     public string BuildInsertQuery(string tableName, IEnumerable<string> columnNames, ImportPolicy policy)
     {
         var cols = columnNames.ToList();

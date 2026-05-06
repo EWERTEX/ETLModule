@@ -35,6 +35,7 @@ public class PostgresDialect : ISqlDialect
         return "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';";
     }
 
+    /// <inheritdoc />
     public string BuildCreateTableQuery(string tableName, Dictionary<string, Type> columns)
     {
         var sb = new StringBuilder();
@@ -53,6 +54,7 @@ public class PostgresDialect : ISqlDialect
         return sb.ToString();
     }
 
+    /// <inheritdoc />
     public string BuildInsertQuery(string tableName, IEnumerable<string> columnNames, ImportPolicy policy)
     {
         var cols = columnNames.ToList();

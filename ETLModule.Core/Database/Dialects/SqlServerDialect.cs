@@ -8,12 +8,14 @@ namespace ETLModule.Core.Database.Dialects;
 /// </summary>
 public class SqlServerDialect : ISqlDialect
 {
+    /// <inheritdoc />
     public string EscapeIdentifier(string identifier)
     {
         // В SQL Server стандарт экранирования - квадратные скобки
         return $"[{identifier}]";
     }
 
+    /// <inheritdoc />
     public string GetSqlDataType(Type type)
     {
         if (type == typeof(Guid)) return "UNIQUEIDENTIFIER";

@@ -65,10 +65,8 @@ public class DataTypeAnalyzer : IDataTypeAnalyzer
         var isDateTime = true;
         var isGuid = true;
 
-        foreach (var value in valuesList)
+        foreach (var value in valuesList.Where(value => !string.IsNullOrWhiteSpace(value)))
         {
-            if (string.IsNullOrWhiteSpace(value)) continue;
-            
             if (isGuid && !Guid.TryParse(value, out _))
             {
                 isGuid = false;

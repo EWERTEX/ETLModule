@@ -14,7 +14,7 @@ namespace ETLModule.ConsoleTest;
 /// Обеспечивает комплексное интеграционное тестирование всех слоев модуля (ETL-конвейера).
 /// Включает проверку файловой подсистемы, анализатора типов и уровня доступа к данным (DAL).
 /// </summary>
-internal static class Test
+internal static class ConsoleTest
 {
     private const string TestTableName = "IntegrationTestUsers";
 
@@ -130,11 +130,11 @@ internal static class Test
     /// <returns>Экземпляр репозитория для работы с БД.</returns>
     /// <exception cref="InvalidOperationException">Генерируется при отсутствии строки подключения.</exception>
     /// <exception cref="NotSupportedException">Генерируется при выборе неподдерживаемой СУБД.</exception>
-    private static IDynamicRepository InitializeRepository(IConfiguration configuration)
+    private static DynamicRepository InitializeRepository(IConfiguration configuration)
     {
-        string dbType = configuration["CurrentDatabase"] ?? "Sqlite";
-        string connectionString = configuration.GetConnectionString(dbType) 
-                                  ?? throw new InvalidOperationException("Строка подключения не найдена.");
+        var dbType = configuration["CurrentDatabase"] ?? "Sqlite";
+        var connectionString = configuration.GetConnectionString(dbType) 
+                               ?? throw new InvalidOperationException("Строка подключения не найдена.");
 
         IDbConnectionFactory factory = dbType switch
         {
@@ -172,7 +172,7 @@ internal static class Test
 
     /// <summary>
     /// Генерирует эталонный набор данных для проведения тестирования.
-    /// Включает краевые случаи (NULL значения, специмволы, различные типы данных).
+    /// Включает краевые случаи (NULL значения, спецсимволы, различные типы данных).
     /// </summary>
     /// <returns>Коллекция типизированных данных.</returns>
     private static List<Dictionary<string, object?>> GenerateTestData()
@@ -189,7 +189,7 @@ internal static class Test
                 { "RegistrationDate", new DateTime(2025, 10, 15, 14, 30, 0) }
             },
 
-            new()
+            new Dictionary<string, object?>
             {
                 { "Id", Guid.NewGuid() },
                 { "FullName", "Анна Смирнова, директор" }, // Проверка экранирования запятых
@@ -207,7 +207,7 @@ internal static class Test
     /// <param name="rawData">Сырые строковые данные из файла.</param>
     /// <param name="schema">Определенная схема типов данных.</param>
     /// <returns>Коллекция данных, готовая для загрузки в базу данных.</returns>
-    private static IEnumerable<Dictionary<string, object?>> TransformData(
+    private static List<Dictionary<string, object?>> TransformData(
         IEnumerable<Dictionary<string, string>> rawData, 
         Dictionary<string, Type> schema)
     {
@@ -217,26 +217,24 @@ internal static class Test
         {
             var typedRow = new Dictionary<string, object?>();
             
-            foreach (var kvp in rawRow)
+            foreach (var (rowName, rowValue) in rawRow)
             {
-                var colName = kvp.Key;
-                var strValue = kvp.Value;
-                var targetType = schema[colName];
+                var targetType = schema[rowName];
 
-                if (string.IsNullOrWhiteSpace(strValue))
+                if (string.IsNullOrWhiteSpace(rowValue))
                 {
-                    typedRow[colName] = null;
+                    typedRow[rowName] = null;
                 }
                 else
                 {
                     // Обработка типа Guid, так как он не реализует интерфейс IConvertible
                     if (targetType == typeof(Guid))
                     {
-                        typedRow[colName] = Guid.Parse(strValue);
+                        typedRow[rowName] = Guid.Parse(rowValue);
                     }
                     else
                     {
-                        typedRow[colName] = Convert.ChangeType(strValue, targetType, CultureInfo.InvariantCulture);
+                        typedRow[rowName] = Convert.ChangeType(rowValue, targetType, CultureInfo.InvariantCulture);
                     }
                 }
             }
