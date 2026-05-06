@@ -1,0 +1,9 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+appsettings.json
+DbExportModule.sln.DotSettings.user
+# JetBrains Rider
+.idea/
