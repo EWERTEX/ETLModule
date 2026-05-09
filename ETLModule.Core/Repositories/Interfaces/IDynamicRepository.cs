@@ -1,6 +1,6 @@
 ﻿using ETLModule.Core.Models;
 
-namespace ETLModule.Core.Repositories;
+namespace ETLModule.Core.Repositories.Interfaces;
 
 /// <summary>
 /// Определяет контракт для динамического взаимодействия с хранилищем данных.

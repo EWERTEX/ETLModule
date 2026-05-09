@@ -1,12 +1,13 @@
-﻿using System.Globalization;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+
+// Подключаем только интерфейсы и фабрики из Ядра!
 using ETLModule.Core.Analysis;
-using ETLModule.Core.Database.Dialects;
-using ETLModule.Core.Database.Factories;
 using ETLModule.Core.Files.Implementations;
 using ETLModule.Core.Files.Interfaces;
 using ETLModule.Core.Models;
-using ETLModule.Core.Repositories;
+using ETLModule.Core.Repositories.Implementations;
+using ETLModule.Core.Repositories.Interfaces;
+using ETLModule.Core.Transformation;
 
 namespace ETLModule.ConsoleTest;
 
@@ -27,7 +28,7 @@ internal static class ConsoleTest
 
         try
         {
-            // 1. Инициализация инфраструктуры
+            // 1. Инициализация инфраструктуры (используем абстракции)
             var configuration = BuildConfiguration();
             var repository = InitializeRepository(configuration);
             var analyzer = new DataTypeAnalyzer();
@@ -65,7 +66,8 @@ internal static class ConsoleTest
 
             // 5. Трансформация данных в соответствии с выведенной схемой
             Console.WriteLine("\n[ЭТАП 4] Трансформация строковых данных в строго типизированные объекты...");
-            var typedData = TransformData(rawDataList, schema);
+            var transformer = new DataTransformer();
+            var typedData = transformer.Transform(rawDataList, schema);
             Console.WriteLine("  -> Преобразование типов завершено без ошибок.");
 
             // 6. Тестирование уровня базы данных (Data Access Layer)
@@ -129,30 +131,22 @@ internal static class ConsoleTest
     /// <param name="configuration">Текущая конфигурация приложения.</param>
     /// <returns>Экземпляр репозитория для работы с БД.</returns>
     /// <exception cref="InvalidOperationException">Генерируется при отсутствии строки подключения.</exception>
-    /// <exception cref="NotSupportedException">Генерируется при выборе неподдерживаемой СУБД.</exception>
-    private static DynamicRepository InitializeRepository(IConfiguration configuration)
+    private static IDynamicRepository InitializeRepository(IConfiguration configuration)
     {
-        var dbType = configuration["CurrentDatabase"] ?? "Sqlite";
-        var connectionString = configuration.GetConnectionString(dbType) 
+        var configDbType = configuration["CurrentDatabase"] ?? "SQLite";
+        var connectionString = configuration.GetConnectionString(configDbType) 
                                ?? throw new InvalidOperationException("Строка подключения не найдена.");
 
-        IDbConnectionFactory factory = dbType switch
+        // Маппинг ключей конфигурации консоли к формату фабрики Ядра
+        var factoryDbType = configDbType switch
         {
-            "Sqlite" => new SqliteConnectionFactory(connectionString),
-            "MsSql" => new SqlServerConnectionFactory(connectionString),
-            "Postgres" => new PostgresConnectionFactory(connectionString),
-            _ => throw new NotSupportedException("Неподдерживаемая БД")
+            "Postgres" => "Postgres",
+            "MsSql" => "MsSql",
+            _ => "Sqlite"
         };
 
-        ISqlDialect dialect = dbType switch
-        {
-            "Sqlite" => new SqliteDialect(),
-            "MsSql" => new SqlServerDialect(),
-            "Postgres" => new PostgresDialect(),
-            _ => throw new NotSupportedException("Неподдерживаемый диалект")
-        };
-
-        return new DynamicRepository(factory, dialect);
+        var factory = new RepositoryFactory();
+        return factory.Create(factoryDbType, connectionString);
     }
 
     /// <summary>
@@ -161,12 +155,20 @@ internal static class ConsoleTest
     /// <returns>Список кортежей, содержащих экспортер, импортер и расширение файла.</returns>
     private static List<(IFileExporter Exporter, IFileImporter Importer, string Extension)> InitializeFileHandlers()
     {
+        var factory = new FileHandlerFactory();
+
+        // Проверяем работу фабрики на лету
+        var csv = factory.GetHandlers("dummy.csv");
+        var json = factory.GetHandlers("dummy.json");
+        var xml = factory.GetHandlers("dummy.xml");
+        var xlsx = factory.GetHandlers("dummy.xlsx");
+
         return
         [
-            (new CsvFileHandler(), new CsvFileHandler(), ".csv"),
-            (new JsonFileHandler(), new JsonFileHandler(), ".json"),
-            (new XmlFileHandler(), new XmlFileHandler(), ".xml"),
-            (new ExcelFileHandler(), new ExcelFileHandler(), ".xlsx")
+            (csv.Exporter, csv.Importer, ".csv"),
+            (json.Exporter, json.Importer, ".json"),
+            (xml.Exporter, xml.Importer, ".xml"),
+            (xlsx.Exporter, xlsx.Importer, ".xlsx")
         ];
     }
 
@@ -199,49 +201,5 @@ internal static class ConsoleTest
                 { "RegistrationDate", null } // Проверка обработки пустых полей
             }
         ];
-    }
-
-    /// <summary>
-    /// Выполняет преобразование сырых строковых данных в типизированные объекты на основе переданной схемы.
-    /// </summary>
-    /// <param name="rawData">Сырые строковые данные из файла.</param>
-    /// <param name="schema">Определенная схема типов данных.</param>
-    /// <returns>Коллекция данных, готовая для загрузки в базу данных.</returns>
-    private static List<Dictionary<string, object?>> TransformData(
-        IEnumerable<Dictionary<string, string>> rawData, 
-        Dictionary<string, Type> schema)
-    {
-        var typedData = new List<Dictionary<string, object?>>();
-
-        foreach (var rawRow in rawData)
-        {
-            var typedRow = new Dictionary<string, object?>();
-            
-            foreach (var (rowName, rowValue) in rawRow)
-            {
-                var targetType = schema[rowName];
-
-                if (string.IsNullOrWhiteSpace(rowValue))
-                {
-                    typedRow[rowName] = null;
-                }
-                else
-                {
-                    // Обработка типа Guid, так как он не реализует интерфейс IConvertible
-                    if (targetType == typeof(Guid))
-                    {
-                        typedRow[rowName] = Guid.Parse(rowValue);
-                    }
-                    else
-                    {
-                        typedRow[rowName] = Convert.ChangeType(rowValue, targetType, CultureInfo.InvariantCulture);
-                    }
-                }
-            }
-            
-            typedData.Add(typedRow);
-        }
-
-        return typedData;
     }
 }

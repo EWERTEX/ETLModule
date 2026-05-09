@@ -1,8 +1,9 @@
 ﻿using ETLModule.Core.Database.Dialects;
 using ETLModule.Core.Database.Factories;
 using ETLModule.Core.Models;
+using ETLModule.Core.Repositories.Interfaces;
 
-namespace ETLModule.Core.Repositories;
+namespace ETLModule.Core.Repositories.Implementations;
 
 /// <summary>
 /// Реализует механизм динамического доступа к данным посредством базовых абстракций ADO.NET.

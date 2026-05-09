@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETLModule.Core", "ETLModule
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETLModule.ConsoleTest", "ETLModule.ConsoleTest\ETLModule.ConsoleTest.csproj", "{24D6D3C9-29BB-4DED-83E1-C40400D44533}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETLModule.Desktop", "ETLModule.Desktop\ETLModule.Desktop.csproj", "{EDDF5390-D774-4202-8C42-25D85EECFCBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{24D6D3C9-29BB-4DED-83E1-C40400D44533}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24D6D3C9-29BB-4DED-83E1-C40400D44533}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24D6D3C9-29BB-4DED-83E1-C40400D44533}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDDF5390-D774-4202-8C42-25D85EECFCBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDDF5390-D774-4202-8C42-25D85EECFCBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDDF5390-D774-4202-8C42-25D85EECFCBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDDF5390-D774-4202-8C42-25D85EECFCBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

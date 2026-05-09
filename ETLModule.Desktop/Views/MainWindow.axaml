@@ -1,0 +1,159 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ETLModule.Desktop.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+        x:Class="ETLModule.Desktop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="{Binding WindowTitle}"
+        Width="1100" Height="700"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource SystemRegionBrush}">
+
+    <Grid RowDefinitions="Auto, *, Auto">
+        
+        <Border Grid.Row="0" 
+                Background="{DynamicResource SystemChromeLowBrush}" 
+                BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="15,10">
+            <Grid ColumnDefinitions="Auto, *, Auto, Auto">
+                
+                <Button Grid.Column="0" 
+                        Command="{Binding TogglePaneCommand}"
+                        Background="Transparent"
+                        Padding="8"
+                        Margin="0,0,15,0"
+                        CornerRadius="4">
+                    <Path Data="{Binding MenuIconData}" Width="20" Height="20" 
+                          Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}" 
+                          StrokeThickness="2" Stretch="Uniform"/>
+                </Button>
+                
+                <TextBlock Grid.Column="1" 
+                           Text="{Binding WindowTitle}" 
+                           FontSize="18" 
+                           FontWeight="SemiBold" 
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="Режим импорта:" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="12"/>
+                    <ComboBox ItemsSource="{Binding ImportPolicies}" 
+                              SelectedItem="{Binding SelectedImportPolicy}"
+                              Width="180">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" ToolTip.Tip="{Binding Description}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <Button Grid.Column="3" 
+                        Command="{Binding ToggleThemeCommand}"
+                        ToolTip.Tip="Сменить тему оформления"
+                        Background="Transparent" 
+                        Padding="8"
+                        CornerRadius="20">
+                    <Path Data="{Binding ThemeIconData}" Width="20" Height="20"
+                          Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                          StrokeThickness="2" StrokeLineCap="Round" StrokeJoin="Round"
+                          Stretch="Uniform" Fill="Transparent"/> 
+                </Button>
+            </Grid>
+        </Border>
+
+        <SplitView Grid.Row="1" 
+                   IsPaneOpen="{Binding IsPaneOpen}"
+                   DisplayMode="Inline"
+                   OpenPaneLength="260"
+                   PaneBackground="{DynamicResource SystemChromeLowBrush}">
+            
+            <SplitView.Pane>
+                <Grid RowDefinitions="Auto, *">
+                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="15">
+                        <ComboBox Grid.Column="0" 
+                                  ItemsSource="{Binding DbmsList}" 
+                                  SelectedItem="{Binding SelectedDbms}"
+                                  HorizontalAlignment="Stretch"
+                                  Margin="0,0,10,0"/>
+                        
+                        <Button Grid.Column="1" 
+                                Command="{Binding AddTableCommand}"
+                                Content="+"
+                                FontSize="18"
+                                FontWeight="Bold"
+                                Width="32" Height="32"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                ToolTip.Tip="Добавить новую таблицу из файла"/>
+                    </Grid>
+                    
+                    <ListBox Grid.Row="1" 
+                             ItemsSource="{Binding Tables}"
+                             SelectedItem="{Binding SelectedTable}"
+                             Background="Transparent"
+                             Margin="5,0"/>
+                </Grid>
+            </SplitView.Pane>
+
+            <Grid RowDefinitions="Auto, *" Margin="20">
+                
+                <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,20">
+                    <TextBlock Text="{Binding SelectedTable, TargetNullValue='Выберите таблицу в меню слева'}" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,15"/>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Content="Импорт (загрузить файл)" 
+                                Command="{Binding ImportDataCommand}"
+                                IsEnabled="{Binding SelectedTable, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                Padding="15,8" FontWeight="Medium"/>
+                        
+                        <Button Content="Экспорт в ▼" 
+                                IsEnabled="{Binding SelectedTable, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                Padding="15,8" FontWeight="Medium">
+                            <Button.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuItem Header="Формат CSV" Command="{Binding ExportDataCommand}" CommandParameter="csv"/>
+                                    <MenuItem Header="Формат JSON" Command="{Binding ExportDataCommand}" CommandParameter="json"/>
+                                    <MenuItem Header="Формат XML" Command="{Binding ExportDataCommand}" CommandParameter="xml"/>
+                                    <MenuItem Header="Формат Excel (XLSX)" Command="{Binding ExportDataCommand}" CommandParameter="xlsx"/>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+                
+                <DataGrid x:Name="MainDataGrid"
+                          Grid.Row="1" 
+                          Margin="0,10,0,0"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          CanUserReorderColumns="True"
+                          CanUserResizeColumns="True"
+                          GridLinesVisibility="All"
+                          BorderThickness="1"
+                          BorderBrush="{DynamicResource SystemChromeMediumBrush}"
+                          Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                </DataGrid>
+                
+            </Grid>
+        </SplitView>
+
+        <Border Grid.Row="2" 
+                Background="{DynamicResource SystemChromeMediumBrush}" 
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                Padding="15,8">
+            <TextBlock Text="{Binding LogMessage}" 
+                       Foreground="{Binding LogColor}"
+                       FontWeight="SemiBold"
+                       FontSize="13"/>
+        </Border>
+        
+    </Grid>
+</Window>
