@@ -40,12 +40,12 @@
 
 1. Склонируйте репозиторий:
    ```bash
-   git clone [https://github.com/your-username/ETLModule.git](https://github.com/your-username/ETLModule.git)
+   git clone https://github.com/EWERTEX/ETLModule.git
    cd ETLModule
    ```
    
 2. **Настройка конфигурации (ВАЖНО):**
-В папке проекта `ETLModule.Desktop` найдите файл `appsettings.example.json`. Скопируйте его, переименуйте в `appsettings.json` и укажите актуальные данные для подключения к вашим базам данных:
+В папке проекта `ETLModule.Desktop` найдите файл `appsettings.example.json`. Переименуйте его в `appsettings.json` и укажите актуальные данные для подключения к вашим базам данных:
 
     ``` json
     {
