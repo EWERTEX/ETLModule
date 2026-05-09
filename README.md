@@ -42,30 +42,30 @@
    ```bash
    git clone [https://github.com/your-username/ETLModule.git](https://github.com/your-username/ETLModule.git)
    cd ETLModule
-
-```
-
+   ```
+   
 2. **Настройка конфигурации (ВАЖНО):**
 В папке проекта `ETLModule.Desktop` найдите файл `appsettings.example.json`. Скопируйте его, переименуйте в `appsettings.json` и укажите актуальные данные для подключения к вашим базам данных:
-```json
-{
-  "ConnectionStrings": {
-    "SQLite": "Data Source=etl.db;",
-    "Postgres": "Host=localhost;Port=5432;Database=etl_db;Username=postgres;Password=YOUR_PASSWORD",
-    "MsSql": "Server=localhost;Database=etl_db;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
 
-```
+    ``` json
+    {
+       "ConnectionStrings": {
+       "Sqlite": "Data Source=DATABASE.db",
+       "MsSql": "Server=SERVER;Database=DATABASE;Trusted_Connection=True;TrustServerCertificate=True;",
+       "Postgres": "Host=HOST;Port=PORT;Database=DATABASE;Username=USERNAME;Password=PASSWORD"
+       },
+       "CurrentDatabase": "Sqlite"
+    }
+    ```
 
+    *(Файл `appsettings.json` добавлен в `.gitignore` для защиты ваших учетных данных).*
 
-*(Файл `appsettings.json` добавлен в `.gitignore` для защиты ваших учетных данных).*
 
 3. Сборка и запуск приложения:
-```bash
-dotnet run --project ETLModule.Desktop
+    ```bash
+    dotnet run --project ETLModule.Desktop
 
-```
+    ```
 
 
 
